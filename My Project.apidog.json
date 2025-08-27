@@ -1,0 +1,687 @@
+{
+  "apidogProject": "1.0.0",
+  "$schema": {
+    "app": "apidog",
+    "type": "project",
+    "version": "1.2.0"
+  },
+  "info": {
+    "name": "My Project",
+    "description": "",
+    "mockRule": {
+      "rules": [],
+      "enableSystemRule": true
+    }
+  },
+  "apiCollection": [
+    {
+      "name": "Root",
+      "id": 2410496,
+      "auth": {
+        "type": "bearer",
+        "bearer": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2Mzg0OTU1LCJpYXQiOjE3NDYzNzc3NTUsImp0aSI6IjcxZDUxMDYzYmYzZTRjMzg4YTIxMGU2ZGNiZWE4OGM2IiwidXNlcl9pZCI6IjhkYzA2MWMyLWY1M2UtNDIwNS1hMzYyLWQ0MGU0MzZjOWUyOSJ9.C47h1EIIlmY9ZFWpdWW-NwNrON9DbnIne3gu_N3FX_A"
+        }
+      },
+      "securityScheme": {},
+      "parentId": 0,
+      "serverId": "",
+      "description": "",
+      "identityPattern": {
+        "httpApi": {
+          "type": "methodAndPath",
+          "bodyType": ""
+        }
+      },
+      "shareSettings": {},
+      "visibility": "SHARED",
+      "moduleId": 506993,
+      "preProcessors": [
+        {
+          "id": "inheritProcessors",
+          "type": "inheritProcessors",
+          "data": {}
+        }
+      ],
+      "postProcessors": [
+        {
+          "id": "inheritProcessors",
+          "type": "inheritProcessors",
+          "data": {}
+        }
+      ],
+      "inheritPostProcessors": {},
+      "inheritPreProcessors": {},
+      "items": [
+        {
+          "name": "hospital",
+          "id": 4600748,
+          "auth": {},
+          "securityScheme": {},
+          "parentId": 0,
+          "serverId": "",
+          "description": "",
+          "identityPattern": {
+            "httpApi": {
+              "type": "inherit",
+              "bodyType": "",
+              "fields": []
+            }
+          },
+          "shareSettings": {},
+          "visibility": "INHERITED",
+          "moduleId": 506993,
+          "preProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "postProcessors": [
+            {
+              "id": "inheritProcessors",
+              "type": "inheritProcessors",
+              "data": {}
+            }
+          ],
+          "inheritPostProcessors": {},
+          "inheritPreProcessors": {},
+          "items": [
+            {
+              "name": "Register_User",
+              "api": {
+                "id": "20201131",
+                "method": "post",
+                "path": "/auth/register",
+                "parameters": {},
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {},
+                "responses": [
+                  {
+                    "id": "29215322",
+                    "code": 201,
+                    "name": "Success",
+                    "headers": [],
+                    "jsonSchema": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "email",
+                        "id",
+                        "name"
+                      ]
+                    },
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "responseExamples": [
+                  {
+                    "name": "Success",
+                    "data": "{\"email\":\"a@gmail.com\",\"id\":\"d839872f-e8d6-480f-a76a-8f5ad5ecc82c\",\"name\":\"alice\"}",
+                    "responseId": 29215322,
+                    "ordering": 1,
+                    "description": "",
+                    "oasKey": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "requestBody": {
+                  "type": "application/json",
+                  "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "email",
+                      "name",
+                      "password"
+                    ]
+                  },
+                  "examples": [
+                    {
+                      "value": "{\r\n    \"email\":\"a@gmail.com\",\r\n    \"name\":\"alice\",\r\n    \"password\":\"secret123\"\r\n}\r\n",
+                      "mediaType": "application/json",
+                      "description": ""
+                    }
+                  ],
+                  "parameters": [],
+                  "oasExtensions": ""
+                },
+                "description": "",
+                "tags": [],
+                "status": "developing",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 10,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 506993,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "login",
+              "api": {
+                "id": "20201167",
+                "method": "post",
+                "path": "/auth/login",
+                "parameters": {},
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {},
+                "responses": [
+                  {
+                    "id": "29215325",
+                    "code": 200,
+                    "name": "Success",
+                    "headers": [],
+                    "jsonSchema": {
+                      "type": "object",
+                      "properties": {
+                        "access_token": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "access_token"
+                      ]
+                    },
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "responseExamples": [
+                  {
+                    "name": "Success",
+                    "data": "{\"access_token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkODM5ODcyZi1lOGQ2LTQ4MGYtYTc2YS04ZjVhZDVlY2M4MmMiLCJyb2xlIjoiVXNlciIsImlhdCI6MTc1NTE0ODUzOSwiZXhwIjoxNzU1MTQ5NDM5LCJqdGkiOiJsQXRmLUpwOENOYjh1clFWZno5X0p3In0.ieR82fXuz5z0x5Ujl7Asfw1DlvXT9fiLmhgxYoetiTM\"}",
+                    "responseId": 29215325,
+                    "ordering": 1,
+                    "description": "",
+                    "oasKey": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "requestBody": {
+                  "type": "application/json",
+                  "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string"
+                      },
+                      "password": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "email",
+                      "password"
+                    ]
+                  },
+                  "examples": [
+                    {
+                      "value": "{\r\n    \"email\":\"a@gmail.com\",\r\n    \"password\":\"secret123\" \r\n}",
+                      "mediaType": "application/json",
+                      "description": ""
+                    }
+                  ],
+                  "parameters": [],
+                  "oasExtensions": ""
+                },
+                "description": "",
+                "tags": [],
+                "status": "developing",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 20,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 506993,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "items",
+              "api": {
+                "id": "20308933",
+                "method": "get",
+                "path": "/items",
+                "parameters": {},
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {
+                  "query": [],
+                  "body": [],
+                  "cookie": [],
+                  "header": []
+                },
+                "responses": [
+                  {
+                    "id": "29384531",
+                    "code": 200,
+                    "name": "Success",
+                    "headers": [],
+                    "jsonSchema": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "responseExamples": [],
+                "requestBody": {
+                  "type": "none",
+                  "parameters": [],
+                  "mediaType": "",
+                  "oasExtensions": ""
+                },
+                "description": "",
+                "tags": [],
+                "status": "developing",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 30,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [
+                  "BLANK.29384531"
+                ],
+                "visibility": "INHERITED",
+                "moduleId": 506993,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            },
+            {
+              "name": "new-items",
+              "api": {
+                "id": "20309095",
+                "method": "post",
+                "path": "/items",
+                "parameters": {
+                  "header": [
+                    {
+                      "name": "Content-Type",
+                      "required": true,
+                      "example": "application/json",
+                      "description": "",
+                      "id": "FEEZLGQU9M",
+                      "type": "string"
+                    },
+                    {
+                      "name": "X-CSRF-Token",
+                      "required": true,
+                      "example": "TlyvbFv3QLmon6LOnBHjQ",
+                      "description": "",
+                      "id": "Cn8HRmXtcg",
+                      "type": "string"
+                    }
+                  ],
+                  "cookie": [
+                    {
+                      "name": "access_token",
+                      "required": true,
+                      "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjNmMyMjYwOC0wZDY1LTQ1YmUtYWNkZC00NTA4MzNiNjJiMGUiLCJyb2xlIjoiVXNlciIsImlhdCI6MTc1NTQ4ODkxMSwiZXhwIjoxNzU1NDg5ODExLCJqdGkiOiJBQW5qNjBtb1hiZE14eTlTTzdyN0dnIn0.5BT8sVgvg9Spv-0Nnv7br3058tAwCAuTsVCSld4ktTU",
+                      "description": "",
+                      "id": "akx0fxdeOr",
+                      "type": "string"
+                    },
+                    {
+                      "name": "refresh_token",
+                      "required": true,
+                      "description": "",
+                      "id": "OmIvlkihiu",
+                      "type": "string"
+                    },
+                    {
+                      "name": "csrf_token",
+                      "required": true,
+                      "example": "TlyvbFv3QLmon6LOnBHjQ",
+                      "description": "",
+                      "id": "B1qfNonvsx",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "auth": {},
+                "securityScheme": {},
+                "commonParameters": {},
+                "responses": [
+                  {
+                    "id": "29385825",
+                    "code": 201,
+                    "name": "Success",
+                    "headers": [],
+                    "jsonSchema": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "owner_id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "owner_id",
+                        "title",
+                        "description",
+                        "created_at",
+                        "updated_at"
+                      ]
+                    },
+                    "description": "",
+                    "contentType": "json",
+                    "mediaType": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "responseExamples": [
+                  {
+                    "name": "Success",
+                    "data": "{\"id\":\"d96275cc-f0b0-459b-a1b3-1d2620ee3101\",\"owner_id\":\"c6c22608-0d65-45be-acdd-450833b62b0e\",\"title\":\"First\",\"description\":\"demo\",\"created_at\":\"2025-08-18T03:57:27.661782Z\",\"updated_at\":\"2025-08-18T03:57:27.661782Z\"}",
+                    "responseId": 29385825,
+                    "ordering": 1,
+                    "description": "",
+                    "oasKey": "",
+                    "oasExtensions": ""
+                  }
+                ],
+                "requestBody": {
+                  "type": "application/json",
+                  "jsonSchema": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "title",
+                      "description"
+                    ]
+                  },
+                  "examples": [
+                    {
+                      "value": "{\r\n    \"title\": \"First\",\r\n    \"description\": \"demo\"\r\n}",
+                      "mediaType": "application/json",
+                      "description": ""
+                    }
+                  ],
+                  "parameters": [],
+                  "oasExtensions": ""
+                },
+                "description": "",
+                "tags": [],
+                "status": "developing",
+                "serverId": "",
+                "operationId": "",
+                "sourceUrl": "",
+                "ordering": 50,
+                "cases": [],
+                "mocks": [],
+                "customApiFields": "{}",
+                "advancedSettings": {
+                  "disabledSystemHeaders": {}
+                },
+                "mockScript": {},
+                "codeSamples": [],
+                "commonResponseStatus": {},
+                "responseChildren": [],
+                "visibility": "INHERITED",
+                "moduleId": 506993,
+                "oasExtensions": "",
+                "type": "http",
+                "preProcessors": [],
+                "postProcessors": [],
+                "inheritPostProcessors": {},
+                "inheritPreProcessors": {}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "socketCollection": [],
+  "docCollection": [],
+  "webSocketCollection": [],
+  "socketIOCollection": [],
+  "responseCollection": [
+    {
+      "_databaseId": 756350,
+      "updatedAt": "2024-11-08T07:08:05.000Z",
+      "name": "Root",
+      "type": "root",
+      "children": [],
+      "moduleId": 506993,
+      "parentId": 0,
+      "id": 756350,
+      "items": [
+        {
+          "_databaseId": 2775834,
+          "name": "Record not found",
+          "moduleId": 506993,
+          "code": 404,
+          "contentType": "json",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "x-apidog-orders": [
+              "code",
+              "message"
+            ]
+          },
+          "defaultEnable": false,
+          "folderId": 0,
+          "id": 2775834,
+          "databaseResponseExamples": [],
+          "responseExamples": []
+        },
+        {
+          "_databaseId": 2775835,
+          "name": "Invalid input",
+          "moduleId": 506993,
+          "code": 400,
+          "contentType": "json",
+          "jsonSchema": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "x-apidog-orders": [
+              "code",
+              "message"
+            ]
+          },
+          "defaultEnable": false,
+          "folderId": 0,
+          "id": 2775835,
+          "databaseResponseExamples": [],
+          "responseExamples": []
+        }
+      ]
+    }
+  ],
+  "schemaCollection": [],
+  "securitySchemeCollection": [],
+  "requestCollection": [
+    {
+      "name": "Root",
+      "children": [],
+      "ordering": [
+        "requestFolder.749053"
+      ],
+      "items": []
+    }
+  ],
+  "environments": [],
+  "commonScripts": [],
+  "globalVariables": [
+    {
+      "id": "729031",
+      "variables": []
+    }
+  ],
+  "moduleVariables": [
+    {
+      "id": "506993",
+      "variables": []
+    }
+  ],
+  "commonParameters": null,
+  "projectSetting": {
+    "id": "729087",
+    "auth": {
+      "type": "bearer",
+      "bearer": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2Mzg0OTU1LCJpYXQiOjE3NDYzNzc3NTUsImp0aSI6IjcxZDUxMDYzYmYzZTRjMzg4YTIxMGU2ZGNiZWE4OGM2IiwidXNlcl9pZCI6IjhkYzA2MWMyLWY1M2UtNDIwNS1hMzYyLWQ0MGU0MzZjOWUyOSJ9.C47h1EIIlmY9ZFWpdWW-NwNrON9DbnIne3gu_N3FX_A"
+      }
+    },
+    "securityScheme": {},
+    "gateway": [],
+    "language": "en-US",
+    "apiStatuses": [
+      "developing",
+      "testing",
+      "released",
+      "deprecated"
+    ],
+    "mockSettings": {},
+    "preProcessors": [],
+    "postProcessors": [],
+    "advancedSettings": {
+      "enableJsonc": false,
+      "enableBigint": false,
+      "responseValidate": true,
+      "enableTestScenarioSetting": false,
+      "enableYAPICompatScript": false,
+      "isDefaultUrlEncoding": 3,
+      "publishedDocUrlRules": {
+        "defaultRule": "SLUGIFY_WITH_RESOURCE_KEY",
+        "resourceKeyStandard": "NEW"
+      }
+    },
+    "initialDisabledMockIds": [],
+    "servers": [
+      {
+        "name": "Default Server",
+        "id": "default"
+      }
+    ],
+    "cloudMock": {
+      "security": "free",
+      "enable": false,
+      "tokenKey": "apidogToken"
+    }
+  },
+  "customFunctions": [],
+  "projectAssociations": []
+}
