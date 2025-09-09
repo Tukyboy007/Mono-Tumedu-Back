@@ -1,4 +1,5 @@
 use crate::error::HttpApiError;
+use crate::extractors::AuthUser;
 use actix_web::{HttpRequest, HttpResponse, get, post, web};
 use auth::{hash_password, sign_access, sign_refresh, verify_password};
 use chrono::{Duration, Utc};
@@ -397,4 +398,44 @@ pub async fn google_callback(
     resp.add_cookie(&csrf_cookie(csrf, &data)).ok();
 
     Ok(resp)
+}
+
+#[get("/auth/me")]
+pub async fn me(
+    data: web::Data<AppState>,
+    auth_user: Option<web::ReqData<AuthUser>>,
+    req: actix_web::HttpRequest,
+) -> actix_web::Result<HttpResponse> {
+    // AuthUser байхгүй бол 401
+    let user = match auth_user {
+        Some(u) => u.into_inner(),
+        None => return Err(actix_web::error::ErrorUnauthorized("not logged in")),
+    };
+
+    // CSRF token шалгах (middleware чинь хүсээд байгаа бол)
+    if let Some(csrf_cookie) = req.cookie("csrf_token") {
+        if let Some(header_val) = req.headers().get("X-CSRF-Token") {
+            let header_str = header_val.to_str().unwrap_or("");
+            if header_str != csrf_cookie.value() {
+                return Err(actix_web::error::ErrorUnauthorized("bad csrf token"));
+            }
+        } else {
+            return Err(actix_web::error::ErrorUnauthorized("missing csrf header"));
+        }
+    }
+
+    // DB-с хэрэглэгчийн мэдээлэл авах
+    if let Some(db_user) = db::find_user_by_id(&data.db, user.user_id)
+        .await
+        .map_err(HttpApiError::from)?
+    {
+        return Ok(HttpResponse::Ok().json(serde_json::json!({
+            "id": db_user.id,
+            "email": db_user.email,
+            "name": db_user.name,
+            "role": db_user.role
+        })));
+    }
+
+    Err(actix_web::error::ErrorUnauthorized("not found"))
 }

@@ -51,16 +51,15 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::default()
-            .allowed_origin("http://localhost:3000")
-            .allowed_origin("http://192.168.99.204:3000")
-            .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
-            .allowed_headers(vec![
-                header::AUTHORIZATION,
-                header::ACCEPT,
-                header::CONTENT_TYPE,
-            ])
-            .supports_credentials() // ← энэ хамгийн чухал
+            .allow_any_method()
+            .allow_any_header()
+            .allowed_origin_fn(|origin, _req_head| {
+                origin.as_bytes().starts_with(b"http://localhost:3000")
+                    || origin.as_bytes().starts_with(b"http://192.168.99.204:3000")
+            })
+            .supports_credentials()
             .max_age(3600);
+
         App::new()
             .wrap(Logger::default())
             .wrap(cors)
@@ -79,6 +78,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::items::remove)
             .service(routes::auth::google_start)
             .service(routes::auth::google_callback)
+            .service(routes::auth::me)
             .default_service(web::to(|| async { HttpResponse::NotFound().finish() }))
             .wrap_fn(|req, srv| {
                 // JWT auth extractor: read Bearer or cookie, set AuthUser ext if valid
