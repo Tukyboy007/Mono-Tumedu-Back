@@ -31,3 +31,5 @@ sha1_smol = "1.0.1"
 openidconnect = { version = "4.0.1", features = ["reqwest"] }
 dashmap = "6.1.0"
 reqwest = { version = "0.12.23", default-features = false, features = ["rustls-tls", "json"] }
+oauth2 = "5.0.0"
+

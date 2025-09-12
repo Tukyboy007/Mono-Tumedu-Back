@@ -340,6 +340,7 @@ dependencies = [
  "dotenvy",
  "futures-util",
  "hex",
+ "oauth2",
  "openidconnect",
  "reqwest",
  "serde",
