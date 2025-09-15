@@ -1,8 +1,8 @@
+use auth::hash_password;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use uuid::Uuid;
-
 #[derive(Debug, Clone)]
 pub struct Db(pub PgPool);
 
@@ -74,20 +74,29 @@ pub async fn insert_user(
     db: &Db,
     email: &str,
     name: &str,
-    password_hash: &str,
+    password: Option<&str>,
     role: &str,
 ) -> Result<UserRow, DbError> {
+    // Хэрэв password байхгүй бол default ашиглана
+    let raw_pass = password.unwrap_or("12345");
+
+    let hash = hash_password(raw_pass)
+        .map_err(|e| DbError::from(sqlx::Error::Protocol(e.to_string().into())))?;
+
     let row = sqlx::query_as::<_, UserRow>(
-        r#"INSERT INTO users (email,name,password_hash,role)
-            VALUES ($1,$2,$3,$4)
-            RETURNING id,email,password_hash,name,role,created_at"#,
+        r#"
+        INSERT INTO users (email, name, password_hash, role)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id, email, password_hash, name, role, created_at
+        "#,
     )
     .bind(email)
     .bind(name)
-    .bind(password_hash)
+    .bind(hash)
     .bind(role)
     .fetch_one(&db.0)
     .await?;
+
     Ok(row)
 }
 

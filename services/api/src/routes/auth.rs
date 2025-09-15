@@ -106,7 +106,7 @@ pub async fn register(
     let hash = hash_password(&payload.password)
         .map_err(|_| actix_web::error::ErrorInternalServerError("hash"))?;
 
-    let user = insert_user(&data.db, &payload.email, &payload.name, &hash, "User")
+    let user = insert_user(&data.db, &payload.email, &payload.name, Some(&hash), "User")
         .await
         .map_err(HttpApiError::from)?;
 
@@ -365,7 +365,7 @@ pub async fn google_callback(
     {
         u
     } else {
-        insert_user(&data.db, &email, &name, "", "User")
+        insert_user(&data.db, &email, &name, None, "User")
             .await
             .map_err(HttpApiError::from)?
     };
