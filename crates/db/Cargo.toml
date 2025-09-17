@@ -11,3 +11,4 @@ chrono = { workspace = true }
 uuid = { workspace = true }
 thiserror = { workspace = true }
 auth = { path = "../auth" }
+common = {path = "../common"}

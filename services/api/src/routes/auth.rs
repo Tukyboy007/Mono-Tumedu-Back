@@ -3,6 +3,7 @@ use crate::extractors::AuthUser;
 use actix_web::{HttpRequest, HttpResponse, get, post, web};
 use auth::{hash_password, sign_access, sign_refresh, verify_password};
 use chrono::{Duration, Utc};
+use common::{AppError, LoginResponse};
 use db::{find_user_by_email, get_refresh_by_jti, insert_refresh, insert_user, revoke_refresh};
 use openidconnect::TokenResponse;
 use openidconnect::{
@@ -106,15 +107,26 @@ pub async fn register(
     let hash = hash_password(&payload.password)
         .map_err(|_| actix_web::error::ErrorInternalServerError("hash"))?;
 
-    let user = insert_user(&data.db, &payload.email, &payload.name, Some(&hash), "User")
-        .await
-        .map_err(HttpApiError::from)?;
+    let default_avatar = 123; // 👈 default avatar ID (config эсвэл .env-с авч болно)
+
+    let user = insert_user(
+        &data.db,
+        &payload.email,
+        &payload.name,
+        Some(&hash),
+        "User",
+        default_avatar,
+    )
+    .await
+    .map_err(HttpApiError::from)?;
 
     Ok(HttpResponse::Created().json(json!({
-        "id": user.id, "email": user.email, "name": user.name
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "avatar_id": user.avatar_id
     })))
 }
-
 #[post("/auth/login")]
 pub async fn login(
     data: web::Data<AppState>,
@@ -128,14 +140,26 @@ pub async fn login(
     if !verify_password(&payload.password, &db_user.password_hash) {
         return Err(actix_web::error::ErrorUnauthorized("invalid creds"));
     }
+    println!("db_user = {:?}", db_user);
 
-    let access = sign_access(&data.jwt, db_user.id, &db_user.role, data.access_ttl)
-        .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
-    let (refresh_token, claims) =
-        sign_refresh(&data.jwt, db_user.id, &db_user.role, data.refresh_ttl)
-            .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
+    // JWT гаргаж авахдаа UUID + user_by_id хоёуланг нь дамжуулж болно
+    let access = sign_access(
+        &data.jwt,
+        db_user.id,
+        db_user.user_by_id,
+        &db_user.role,
+        data.access_ttl,
+    )
+    .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
+    let (refresh_token, claims) = sign_refresh(
+        &data.jwt,
+        db_user.id,
+        db_user.user_by_id,
+        &db_user.role,
+        data.refresh_ttl,
+    )
+    .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
 
-    // DB-д refresh хадгалах (hash)
     let token_hash = format!("sha256:{}", sha256_hex(&refresh_token));
     let expires_at = Utc::now() + Duration::seconds(data.refresh_ttl);
     insert_refresh(&data.db, db_user.id, &claims.jti, &token_hash, expires_at)
@@ -144,13 +168,21 @@ pub async fn login(
 
     let csrf_token = auth::new_jti();
 
-    let mut resp = HttpResponse::Ok().json(TokenPair {
+    let resp_body = LoginResponse {
         access_token: access.clone(),
-    });
+        email: db_user.email.clone(),
+        name: db_user.name.clone(),
+        role: db_user.role.clone(),
+        avatar_id: db_user.avatar_id,
+        user_by_id: db_user.user_by_id, // 👈 нэмэгдсэн талбар
+    };
+
+    let mut resp = HttpResponse::Ok().json(resp_body);
     resp.add_cookie(&access_cookie(access, &data)).ok();
     resp.add_cookie(&refresh_cookie(refresh_token, &data, data.refresh_ttl))
         .ok();
     resp.add_cookie(&csrf_cookie(csrf_token, &data)).ok();
+
     Ok(resp)
 }
 
@@ -187,11 +219,23 @@ pub async fn refresh(
     revoke_refresh(&data.db, &claims.jti)
         .await
         .map_err(HttpApiError::from)?;
-    let access = sign_access(&data.jwt, claims.sub, &claims.role, data.access_ttl)
-        .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
-    let (refresh_new, claims_new) =
-        sign_refresh(&data.jwt, claims.sub, &claims.role, data.refresh_ttl)
-            .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
+    let access = sign_access(
+        &data.jwt,
+        claims.sub,
+        claims.user_by_id,
+        &claims.role,
+        data.access_ttl,
+    )
+    .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
+
+    let (refresh_new, claims_new) = sign_refresh(
+        &data.jwt,
+        claims.sub,
+        claims.user_by_id,
+        &claims.role,
+        data.refresh_ttl,
+    )
+    .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
 
     let token_hash = format!("sha256:{}", sha256_hex(&refresh_new));
     let expires_at = Utc::now() + Duration::seconds(data.refresh_ttl);
@@ -298,6 +342,7 @@ pub async fn google_callback(
     data: web::Data<AppState>,
     q: web::Query<GoogleCb>,
 ) -> actix_web::Result<HttpResponse> {
+    // ---- OIDC flow ----
     let (nonce_str, pkce_verifier): (String, PkceCodeVerifier) = data
         .oauth_state
         .remove(&q.state)
@@ -308,6 +353,7 @@ pub async fn google_callback(
         .redirect(reqwest::redirect::Policy::none())
         .build()
         .map_err(|_| actix_web::error::ErrorInternalServerError("http client"))?;
+
     let provider = CoreProviderMetadata::discover_async(
         IssuerUrl::new("https://accounts.google.com".to_string()).unwrap(),
         &http,
@@ -358,24 +404,41 @@ pub async fn google_callback(
         return Err(actix_web::error::ErrorForbidden("email not verified"));
     }
 
-    // DB upsert
+    // ---- DB upsert ----
+    let default_avatar: i32 = 123;
     let db_user = if let Some(u) = find_user_by_email(&data.db, &email)
         .await
         .map_err(HttpApiError::from)?
     {
         u
     } else {
-        insert_user(&data.db, &email, &name, None, "User")
+        let default_password = "password123";
+        let hash =
+            hash_password(default_password).map_err(|_| HttpApiError::App(AppError::HashError))?;
+
+        insert_user(&data.db, &email, &name, Some(&hash), "User", default_avatar)
             .await
             .map_err(HttpApiError::from)?
     };
 
-    // JWT + refresh хадгалалт
-    let access = sign_access(&data.jwt, db_user.id, &db_user.role, data.access_ttl)
-        .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
-    let (refresh_token, rclaims) =
-        sign_refresh(&data.jwt, db_user.id, &db_user.role, data.refresh_ttl)
-            .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
+    // ---- JWT + refresh ----
+    let access = sign_access(
+        &data.jwt,
+        db_user.id,
+        db_user.user_by_id,
+        &db_user.role,
+        data.access_ttl,
+    )
+    .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
+
+    let (refresh_token, rclaims) = sign_refresh(
+        &data.jwt,
+        db_user.id,
+        db_user.user_by_id,
+        &db_user.role,
+        data.refresh_ttl,
+    )
+    .map_err(|_| actix_web::error::ErrorInternalServerError("jwt"))?;
 
     let token_hash = format!("sha256:{}", sha256_hex(&refresh_token));
     let expires_at = Utc::now() + Duration::seconds(data.refresh_ttl);
@@ -383,11 +446,12 @@ pub async fn google_callback(
         .await
         .map_err(HttpApiError::from)?;
 
-    // Redirect буцаах URL-ийг (.env) уншина — AppState талбар шаардахгүй
-    let frontend_redirect =
-        std::env::var("FRONTEND_REDIRECT_URL").unwrap_or_else(|_| "/".to_string());
-
     let csrf = auth::new_jti();
+
+    // ---- Response (login-тэй адил JSON) ----
+    let frontend_redirect = std::env::var("FRONTEND_REDIRECT_URL")
+        .unwrap_or_else(|_| "http://localhost:3000/profile".to_string());
+
     let mut resp = HttpResponse::Found()
         .append_header(("Location", frontend_redirect))
         .finish();
@@ -399,20 +463,17 @@ pub async fn google_callback(
 
     Ok(resp)
 }
-
 #[get("/auth/me")]
 pub async fn me(
     data: web::Data<AppState>,
     auth_user: Option<web::ReqData<AuthUser>>,
     req: actix_web::HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    // AuthUser байхгүй бол 401
     let user = match auth_user {
         Some(u) => u.into_inner(),
         None => return Err(actix_web::error::ErrorUnauthorized("not logged in")),
     };
 
-    // CSRF token шалгах (middleware чинь хүсээд байгаа бол)
     if let Some(csrf_cookie) = req.cookie("csrf_token") {
         if let Some(header_val) = req.headers().get("X-CSRF-Token") {
             let header_str = header_val.to_str().unwrap_or("");
@@ -424,16 +485,17 @@ pub async fn me(
         }
     }
 
-    // DB-с хэрэглэгчийн мэдээлэл авах
     if let Some(db_user) = db::find_user_by_id(&data.db, user.user_id)
         .await
         .map_err(HttpApiError::from)?
     {
         return Ok(HttpResponse::Ok().json(serde_json::json!({
             "id": db_user.id,
+            "user_by_id": db_user.user_by_id,   // 👈 нэмсэн
             "email": db_user.email,
             "name": db_user.name,
-            "role": db_user.role
+            "role": db_user.role,
+            "avatar_id": db_user.avatar_id     // 👈 нэмсэн
         })));
     }
 

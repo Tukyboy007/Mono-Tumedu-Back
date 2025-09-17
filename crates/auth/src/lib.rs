@@ -26,11 +26,12 @@ impl JwtKeys {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: Uuid,
+    pub sub: Uuid,       // үндсэн UUID
+    pub user_by_id: i64, // int8 identity column
     pub role: String,
     pub iat: i64,
     pub exp: i64,
-    pub jti: String, // unique id to tie refresh tokens to DB records
+    pub jti: String,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -52,6 +53,7 @@ pub fn new_jti() -> String {
 pub fn sign_access(
     keys: &JwtKeys,
     user_id: Uuid,
+    user_by_id: i64,
     role: &str,
     ttl_secs: i64,
 ) -> Result<String, AuthError> {
@@ -59,6 +61,7 @@ pub fn sign_access(
     let exp = iat + ttl_secs;
     let claims = Claims {
         sub: user_id,
+        user_by_id, // 👈 нэмсэн
         role: role.into(),
         iat,
         exp,
@@ -71,6 +74,7 @@ pub fn sign_access(
 pub fn sign_refresh(
     keys: &JwtKeys,
     user_id: Uuid,
+    user_by_id: i64,
     role: &str,
     ttl_secs: i64,
 ) -> Result<(String, Claims), AuthError> {
@@ -78,6 +82,7 @@ pub fn sign_refresh(
     let exp = iat + ttl_secs;
     let claims = Claims {
         sub: user_id,
+        user_by_id, // 👈 нэмсэн
         role: role.into(),
         iat,
         exp,

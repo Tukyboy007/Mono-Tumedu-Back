@@ -10,6 +10,7 @@ use dashmap::DashMap;
 
 use tracing_subscriber::EnvFilter;
 
+mod auth_guard;
 mod error;
 mod extractors;
 mod middleware;
@@ -71,11 +72,14 @@ async fn main() -> std::io::Result<()> {
             .service(routes::auth::login)
             .service(routes::auth::refresh)
             .service(routes::auth::logout)
-            .service(routes::items::list)
-            .service(routes::items::get)
-            .service(routes::items::create)
-            .service(routes::items::update)
-            .service(routes::items::remove)
+            .service(routes::user::update_avatar)
+            .service(routes::user::update_email)
+            .service(routes::user::update_name)
+            .service(routes::user::update_password)
+            .service(routes::order::create_order)
+            .service(routes::order::get_orders)
+            .service(routes::order::update_order_done)
+            .service(routes::order::check_order)
             .service(routes::auth::google_start)
             .service(routes::auth::google_callback)
             .service(routes::auth::me)
@@ -105,6 +109,7 @@ async fn main() -> std::io::Result<()> {
                             .extensions_mut()
                             .insert(crate::extractors::AuthUser {
                                 user_id: claims.sub,
+                                user_by_id: claims.user_by_id,
                                 role: claims.role,
                             });
                     }

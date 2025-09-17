@@ -5,6 +5,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone)]
 pub struct AuthUser {
     pub user_id: Uuid,
+    pub user_by_id: i64,
     pub role: String,
 }
 
